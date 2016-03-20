@@ -18,15 +18,12 @@ class SearchProblem:
     def getCostOfActions(self, actions):
         pass
 def depthFirstSearch(problem):
-    a=Stack()
+    a=Stack() #fringe
     expand=set([])
     enque=[]
-    #parent=[]
+
     start_state=problem.getStartState()
-    #state_id={0:start_state}
-    #path=[]
     a.push((start_state,[]))
-    #iden=0
     while (a.isEmpty()==False):
         state,actions=a.pop()
         if problem.isGoalState(state)==True:
@@ -35,21 +32,7 @@ def depthFirstSearch(problem):
         expand.add(state)
         for i in b:
             if i[0] not in expand:
-                a.push((i[0],actions + [i[1]]))
-                #state_id[iden]=i[0]
-                #q=state,i[1]
-                #parent.append(q)
-                #iden+=1
-    '''while(state!=start_state):
-        s=0
-        for ID,sta in state_id.items():
-            if sta==state:
-                s=ID
-                break
-        path.append(parent[s][1])
-        state=parent[s][0]
-    #return state_id
-    return path[::-1]  '''      
+                a.push((i[0],actions + [i[1]])) 
     return []
 def breadthFirstSearch(problem):
     a=Queue()
@@ -89,22 +72,26 @@ def uniformCostSearch(problem):
                    a.push((i[0],actions + [i[1]] , total_cost),total_cost)
     return path
 def astarSearch(problem,heuristic):
-    a=PriorityQueue()
-    path=[]
-    visit=[]
-    start_state=problem.getStartState()
-    state_id={}
-    cost={start_state:heuristic(start_state)}
-    a.push(start_state,0)
-    while (a.isEmpty()==False):
-       state=a.pop()
-       if problem.isGoalState(state)==True:
-           path.append(state)
-           break
-       if state not in visit:
-           b=problem.getSuccessors(state)
-           visit.append(state)
-           path.append(state)
-           for i in b:
-               cost[i[0]] =cost[state] + i[2] +heuristic(i[0])
-               a.push(i[0],cost[i[0]])
+    expandedStates = set([])
+	startState = problem.getStartState()
+
+	fringe = util.PriorityQueue()
+	startHeurisitc = heuristic(startState, problem)
+	fringe.push((startState,[], 0), startHeurisitc)
+
+	while not fringe.isEmpty():
+		state, actions, costSoFar = fringe.pop()
+
+		if(problem.isGoalState(state)):
+			return actions
+
+		if state in expandedStates:
+			continue
+
+		expandedStates.add(state)
+		for nextState, action, cost in problem.getSuccessors(state):
+			totalCost = costSoFar + cost + heuristic(nextState, problem)
+			backwardCost = costSoFar + cost
+			fringe.push((nextState, actions + [action], backwardCost), totalCost)
+
+	return []
